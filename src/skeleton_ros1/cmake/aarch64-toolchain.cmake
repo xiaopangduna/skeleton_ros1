@@ -1,0 +1,13 @@
+# aarch64 交叉编译工具链配置文件
+
+# 设置目标系统
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR aarch64)
+
+# 指定交叉编译工具链前缀
+set(CROSS_COMPILE_PREFIX aarch64-linux-gnu)
+
+# 指定交叉编译器
+set(CMAKE_C_COMPILER ${CROSS_COMPILE_PREFIX}-gcc)
+set(CMAKE_CXX_COMPILER ${CROSS_COMPILE_PREFIX}-g++)
+
