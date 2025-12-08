@@ -1,0 +1,7 @@
+<launch>
+  <!-- Launch the C++ talker node -->
+  <node name="cpp_talker" pkg="skeleton_ros1" type="cpp_talker" output="screen" />
+  
+  <!-- Launch the Python listener node -->
+  <node name="py_listener" pkg="skeleton_ros1" type="py_listener.py" output="screen" />
+</launch>
