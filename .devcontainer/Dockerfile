@@ -1,15 +1,20 @@
-FROM ros:noetic
+FROM osrf/ros:noetic-desktop-full
 
 # 避免在非交互模式下出现tzdata错误
 ARG DEBIAN_FRONTEND=noninteractive
 
-# 安装常用工具
-RUN apt-get update && apt-get install -y \
-    git \
-    vim \
-    wget \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git
 
-# 设置工作目录
-WORKDIR /root/catkin_ws
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential    
+
+RUN rm -rf /var/lib/apt/lists/*
+#     build-essential \
+#     cmake \
+#     python3-pip \
+#     vim \
+#     net-tools \
+#     iputils-ping \
+#     && rm -rf /var/lib/apt/lists/*
+

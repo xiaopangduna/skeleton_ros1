@@ -2,10 +2,12 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/cpp
 {
     "name": "ros_noetic_dev ",
-    "image": "ros_noetic_dev:latest",
-    // "build": {
-    // 	"dockerfile": "Dockerfile"
-    // }
+    // 指定镜像
+    // "image": "ros_noetic_dev:latest", 
+    "build": {
+    	"dockerfile": "Dockerfile",
+        "context": ".."
+    },
     // "mounts": [
     //     {
     //         //将服务器上的插件挂载至容器
@@ -30,6 +32,10 @@
         "DISPLAY": "${localEnv:DISPLAY}",
         "NO_AT_BRIDGE": "1"
 
-    }
+    },
+    // 创建容器后执行
+    "postCreateCommand": "bash .devcontainer/post-create.sh",
+    // 每次启动容器执行
+    "postStartCommand": "bash .devcontainer/post-start.sh"
 
 }

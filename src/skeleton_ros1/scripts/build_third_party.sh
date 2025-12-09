@@ -40,7 +40,7 @@ done
 if [ -z "$PLATFORM" ]; then
     echo "用法: $0 <platform> [--libs <libraries>]"
     echo "支持的平台: aarch64, x86_64"
-    echo "支持的库: gtest, opencv"
+    echo "支持的库: gtest, opencv, spdlog"
     exit 1
 fi
 
@@ -101,9 +101,11 @@ echo "交叉编译工具链检查通过"
 if [ "$LIBS_TO_BUILD" = "all" ]; then
     BUILD_GTEST=yes
     BUILD_OPENCV=yes
+    BUILD_SPDLOG=yes
 else
     BUILD_GTEST=no
     BUILD_OPENCV=no
+    BUILD_SPDLOG=no
     
     IFS=',' read -ra LIBS <<< "$LIBS_TO_BUILD"
     for lib in "${LIBS[@]}"; do
@@ -113,6 +115,9 @@ else
                 ;;
             opencv)
                 BUILD_OPENCV=yes
+                ;;
+            spdlog)
+                BUILD_SPDLOG=yes
                 ;;
             *)
                 echo "警告: 忽略未知的库 '$lib'"
@@ -155,7 +160,7 @@ if [ "$BUILD_OPENCV" = "yes" ]; then
     if [ ! -d "opencv" ]; then
         git clone https://gitee.com/opencv/opencv.git
         cd ${PROJECT_ROOT}/tmp/opencv
-        git checkout 4.2.0
+        git checkout 4.10.0
     else
         echo "opencv目录已存在，跳过git clone步骤"
     fi
@@ -177,6 +182,34 @@ if [ "$BUILD_OPENCV" = "yes" ]; then
     echo "OpenCV编译完成"
 else
     echo "跳过OpenCV编译"
+fi
+
+# 编译spdlog（如果需要）
+if [ "$BUILD_SPDLOG" = "yes" ]; then
+    echo "开始编译spdlog..."
+    cd ${PROJECT_ROOT}/tmp
+    if [ ! -d "spdlog" ]; then
+        git clone https://gitee.com/mirror-luyi/spdlog.git
+        cd ${PROJECT_ROOT}/tmp/spdlog
+        git checkout v1.14.1
+    else
+        echo "spdlog目录已存在，跳过git clone步骤"
+    fi
+    cd ${PROJECT_ROOT}/tmp/spdlog
+    rm -rf build_${PLATFORM}
+    mkdir -p build_${PLATFORM} && cd build_${PLATFORM}
+
+    cmake .. \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}/spdlog/${PLATFORM} \
+        -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE} 
+
+    make -j4
+    make install
+
+    echo "spdlog编译完成"
+else
+    echo "跳过spdlog编译"
 fi
 
 echo "为${PLATFORM}平台的第三方库构建任务已完成"
