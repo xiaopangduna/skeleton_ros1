@@ -4,9 +4,9 @@ project(demo_app)
 
 add_executable(demo_app main.cpp)
 
-target_link_libraries(demo_app PRIVATE skeleton_cpp ${OpenCV_LIBS})
+target_link_libraries(demo_app PRIVATE skeleton_ros1)
 
 # 安装可执行文件
 install(TARGETS demo_app
-    RUNTIME DESTINATION bin
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

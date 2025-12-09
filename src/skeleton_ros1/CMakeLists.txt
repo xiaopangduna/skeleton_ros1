@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(skeleton_ros1)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+add_compile_options(-std=c++17)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -11,10 +11,11 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   roscpp
   rospy
+  rosconsole
   std_msgs
 )
-list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(FindThirdParty)
 
 ## System dependencies are found with CMake's conventions
@@ -72,10 +73,10 @@ include(FindThirdParty)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -107,11 +108,14 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
+#  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS 
     message_runtime 
     roscpp 
     rospy 
     std_msgs
+#  DEPENDS system_lib
 )
 
 ###########
@@ -126,9 +130,15 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/skeleton_ros1.cpp
-# )
+add_library(${PROJECT_NAME} STATIC
+  src/calculator/Calculator.cpp
+  src/ProcessorNode.cpp
+)
+
+target_include_directories(${PROJECT_NAME} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -141,14 +151,18 @@ include_directories(
 ## Declare C++ executables
 add_executable(cpp_talker src/cpp_talker.cpp)
 add_executable(cpp_listener src/cpp_listener.cpp)
+add_executable(cpp_processor src/processor_node.cpp)
 
 ## Add cmake target dependencies of the executable
 add_dependencies(cpp_talker ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(cpp_listener ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(cpp_processor ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link executable targets
-target_link_libraries(cpp_talker ${catkin_LIBRARIES})
-target_link_libraries(cpp_listener ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${OpenCV_LIBS} spdlog::spdlog ${catkin_LIBRARIES})
+target_link_libraries(cpp_talker ${PROJECT_NAME})
+target_link_libraries(cpp_listener ${PROJECT_NAME})
+target_link_libraries(cpp_processor ${PROJECT_NAME})
 
 #############
 ## Install ##
@@ -170,6 +184,7 @@ catkin_install_python(PROGRAMS
 install(TARGETS 
   cpp_talker 
   cpp_listener
+  cpp_processor
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -207,3 +222,5 @@ install(TARGETS
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+add_subdirectory(apps)
