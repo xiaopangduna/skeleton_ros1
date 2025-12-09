@@ -23,8 +23,8 @@
     "runArgs": [
         "--env=DISPLAY=${env:DISPLAY}",
         "--env=NO_AT_BRIDGE=1",
-        "--volume=/tmp/.X11-unix:/tmp/.X11-unix:rw"
-
+        "--volume=/tmp/.X11-unix:/tmp/.X11-unix:rw",
+        "--network=host"
     ],
     "containerEnv": {
         "DISPLAY": "${localEnv:DISPLAY}",
