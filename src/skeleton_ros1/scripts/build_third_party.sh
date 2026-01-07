@@ -1,6 +1,6 @@
 #!/bin/bash
-# bash scripts/build_third_party.sh x86_64 --libs gtest,opencv,spdlog
-# bash scripts/build_third_party.sh aarch64 --libs gtest,opencv,spdlog
+# bash src/skeleton_ros1/scripts/build_third_party.sh x86_64 --libs gtest,opencv,spdlog
+# bash src/skeleton_ros1/scripts/build_third_party.sh aarch64 --libs gtest,opencv,spdlog
 # 为不同平台编译第三方库的通用脚本
 
 set -e  # 遇到错误时停止执行

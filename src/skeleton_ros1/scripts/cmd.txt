@@ -1,0 +1,5 @@
+catkin_make -DCMAKE_BUILD_TYPE=Debug
+# 编译
+bash ./src/calib_bev/scripts/build.sh 
+# 测试
+bash ./src/calib_bev/scripts/test.sh 

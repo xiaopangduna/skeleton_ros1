@@ -36,6 +36,18 @@
     // 创建容器后执行
     "postCreateCommand": "bash .devcontainer/post-create.sh",
     // 每次启动容器执行
-    "postStartCommand": "bash .devcontainer/post-start.sh"
+    "postStartCommand": "bash .devcontainer/post-start.sh",
+    "customizations": {
+    "vscode": {
+    "extensions": [
+        "ms-vscode.cpptools",
+        "twxs.cmake",
+        "ms-vscode.cmake-tools",
+        "ms-python.python",
+        "alibaba-cloud.tongyi-lingma",
+        "SimpleToolsDev.opencv-image"
+    ]
+    }
+}
 
 }

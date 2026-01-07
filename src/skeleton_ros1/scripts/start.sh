@@ -1,0 +1,1 @@
+source devel/setup.bash && rosrun calib_bev multi_fisheye_camera_calibrator

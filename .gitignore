@@ -1,9 +1,13 @@
-build/
 third_party/
+runs/
 datas/
-install/
 tmp/
+build/
 devel/
+install/
+
+Testing/
+
 .catkin_workspace
 
 

@@ -175,8 +175,6 @@ target_link_libraries(cpp_processor ${PROJECT_NAME})
 ## in contrast to setup.py, you can choose the destination
 ## Mark executable scripts (Python etc.) for installation
 catkin_install_python(PROGRAMS
-  scripts/py_talker.py
-  scripts/py_listener.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
