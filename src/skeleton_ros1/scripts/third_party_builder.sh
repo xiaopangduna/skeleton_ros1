@@ -8,6 +8,12 @@ set -e
 # 记录开始时间
 START_TIME=$(date +%s)
 
+# 初始化变量
+LIBS_TO_BUILD=""
+PLATFORM=""
+PROJECT_ROOT=""
+FAILED_LIBS=""
+
 # 显示帮助信息
 show_help() {
     echo "第三方库构建系统 - 调度脚本"
@@ -20,30 +26,33 @@ show_help() {
     echo "  <platform>                 目标平台 (aarch64, x86_64)"
     echo "  --libs <libraries>         逗号分隔的库列表，或使用 'all' 构建所有库"
     echo ""
+    echo "可选参数:"
+    echo "  --project-root <path>      指定项目根目录 (默认为脚本所在目录的父目录)"
+    echo ""
     echo "支持的库:"
     echo "  cnpy       - C++ NumPy 文件读写库"
     echo "  gtest      - Google Test 测试框架 (v1.14.0)"
     echo "  opencv     - OpenCV 计算机视觉库 (4.5.4)"
     echo "  rga        - Rockchip 2D 图形加速库"
-    echo "  rknpu      - Rockchip NPU 库 (仅 aarch64 平台)"
+    echo "  rknpu      - Rockchip NPU 库 (仅 aarch64 平台) - 需要手动准备库文件"
     echo "  spdlog     - 快速C++日志库 (v1.14.1)"
+    echo "  yaml-cpp   - YAML 数据解析库 (v0.8.0)"
+    echo "  zlib       - 数据压缩库 (v1.3.1)"
     echo ""
     echo "示例:"
     echo "  bash scripts/third_party_builder.sh aarch64 --libs all"
     echo "  bash scripts/third_party_builder.sh x86_64 --libs gtest,opencv"
     echo "  bash scripts/third_party_builder.sh aarch64 --libs spdlog,cnpy,rknpu"
+    echo "  bash scripts/third_party_builder.sh aarch64 --libs all --project-root /path/to/project "
     echo ""
     echo "注意:"
-    echo "  1. 必须在项目根目录下运行，或者通过--project-root指定项目根目录"
+    echo "  1. 可以在任意目录下运行，使用--project-root指定项目根目录"
     echo "  2. 构建过程中会下载源代码到tmp目录，请确保有足够的磁盘空间"
     echo "  3. 构建的库将安装到third_party/<库名>/<平台>/目录"
     echo "  4. 具体每个库的平台支持由各个库的构建器脚本决定"
+    echo "  5. rknpu库需要手动准备预编译库文件到third_party/rknpu[1|2]/目录"
     echo ""
 }
-
-# 初始化变量
-LIBS_TO_BUILD=""
-PLATFORM=""
 
 # 特殊处理 --help 参数
 # 检查是否有 --help 或 -h 参数
@@ -66,6 +75,15 @@ while [[ $# -gt 0 ]]; do
                 exit 1
             fi
             LIBS_TO_BUILD="$2"
+            shift 2
+            ;;
+        --project-root)
+            if [ -z "$2" ] || [[ "$2" == -* ]]; then
+                echo "错误: --project-root 参数需要一个路径值"
+                echo "请使用 $0 --help 查看完整用法"
+                exit 1
+            fi
+            PROJECT_ROOT="$2"
             shift 2
             ;;
         --help|-h)
@@ -103,15 +121,35 @@ if [ -z "$LIBS_TO_BUILD" ]; then
     exit 1
 fi
 
-# 获取项目根目录
-SCRIPT_DIR=$(dirname "$(realpath "$0")")
-PROJECT_ROOT=$(realpath "$SCRIPT_DIR/..")
+# 如果没有指定项目根目录，则使用脚本所在目录的父目录
+if [ -z "$PROJECT_ROOT" ]; then
+    SCRIPT_DIR=$(dirname "$(realpath "$0")")
+    PROJECT_ROOT=$(realpath "$SCRIPT_DIR/..")
+else
+    # 如果指定了项目根目录，将 PROJECT_ROOT 转换为绝对路径
+    PROJECT_ROOT=$(realpath "$PROJECT_ROOT")
+    # 无论如何，我们仍需要使用脚本所在的实际位置来找到构建器目录
+    SCRIPT_DIR=$(dirname "$(realpath "$0")")
+fi
+
 echo "项目根目录: $PROJECT_ROOT"
 
-# 第三方构建器目录
+# 配置 Git 安全目录以避免 "detected dubious ownership" 错误
+# 添加基本目录
+git config --global --add safe.directory "$PROJECT_ROOT/tmp"
+git config --global --add safe.directory "$PROJECT_ROOT/third_party"
+
+# 遍历并添加 tmp 目录下的所有 Git 仓库
+for git_dir in "$PROJECT_ROOT/tmp/"*/; do
+  if [ -d "$git_dir/.git" ]; then
+    git config --global --add safe.directory "$git_dir"
+  fi
+done
+
+# 第三方构建器目录 - 基于脚本所在的实际目录计算，这样不受 PROJECT_ROOT 设置的影响
 THIRD_PARTY_BUILDERS_DIR="$SCRIPT_DIR/third_party_builders"
 
-# 检查第三方构建器目录是否存在
+# 检查第三方构建器目录是否存在（这个变量已经在上面设置了）
 if [ ! -d "$THIRD_PARTY_BUILDERS_DIR" ]; then
     echo "错误: 找不到第三方构建器目录: $THIRD_PARTY_BUILDERS_DIR"
     echo "请确保 scripts/third_party_builders 目录存在"
@@ -127,12 +165,14 @@ echo "构建器目录: $THIRD_PARTY_BUILDERS_DIR"
 echo "================================================================"
 
 # 根据平台设置工具链文件（可选，构建器脚本可能会忽略）
+# 使用脚本所在目录的父目录来定位工具链文件，而不是使用 PROJECT_ROOT
+SCRIPT_BASED_PROJECT_ROOT=$(realpath "$SCRIPT_DIR/..")
 case "${PLATFORM}" in
     aarch64)
-        TOOLCHAIN_FILE=${PROJECT_ROOT}/cmake/aarch64-toolchain.cmake
+        TOOLCHAIN_FILE=${SCRIPT_BASED_PROJECT_ROOT}/cmake/aarch64-toolchain.cmake
         ;;
     x86_64)
-        TOOLCHAIN_FILE=${PROJECT_ROOT}/cmake/x86_64-toolchain.cmake
+        TOOLCHAIN_FILE=${SCRIPT_BASED_PROJECT_ROOT}/cmake/x86_64-toolchain.cmake
         ;;
     *)
         echo "错误: 不支持的平台 '${PLATFORM}'"
@@ -193,7 +233,7 @@ for lib in "${LIBS_ARRAY[@]}"; do
     
     if [ ! -f "$build_script" ]; then
         echo "错误: 库 '$lib' 的构建脚本不存在: $build_script"
-        echo "支持的库: gtest, opencv, spdlog, rknpu, cnpy, rga"
+        echo "支持的库: gtest, opencv, spdlog, rknpu, cnpy, rga, yaml-cpp, zlib"
         echo "可用构建器:"
         ls -1 "$THIRD_PARTY_BUILDERS_DIR"/builder_*.sh 2>/dev/null | 
             sed 's|.*/builder_||;s|\.sh||' | 
@@ -212,18 +252,19 @@ for lib in "${LIBS_ARRAY[@]}"; do
     
     # 调用具体的库构建脚本，传递所需参数
     # 调度脚本不管理具体编译逻辑，只负责传递参数
-    if ! source "$build_script" \
+    if ! bash "$build_script" \
         --platform "$PLATFORM" \
         --project-root "$PROJECT_ROOT" \
         --install-dir "$INSTALL_DIR" \
         --toolchain-file "$TOOLCHAIN_FILE"
     then
         echo "错误: 构建 $lib 失败"
-        echo "请检查构建日志以获取更多信息"
-        exit 1
+        echo "继续构建其他库..."
+        # 记录失败的库
+        FAILED_LIBS="${FAILED_LIBS} $lib"
+    else
+        echo "完成构建: $lib"
     fi
-    
-    echo "完成构建: $lib"
 done
 
 # 计算并显示总耗时
@@ -235,21 +276,46 @@ echo "===================================================================="
 echo "第三方库构建完成！"
 echo "===================================================================="
 echo "总耗时: ${DURATION}秒"
-echo "所有指定的库已成功构建并安装到:"
+
+# 检查是否有失败的库
+if [ -n "$FAILED_LIBS" ]; then
+    echo "部分库构建失败:"
+    for failed_lib in $FAILED_LIBS; do
+        echo "  - $failed_lib"
+    done
+    echo ""
+    echo "其余库已成功构建并安装到:"
+else
+    echo "所有指定的库已成功构建并安装到:"
+fi
+
 echo "$INSTALL_DIR"
 echo ""
 echo "各个库的安装位置:"
 for lib in "${LIBS_ARRAY[@]}"; do
     lib=$(echo "$lib" | xargs)
     if [ -n "$lib" ]; then
-        # 尝试查找安装目录（不同库可能有不同的安装结构）
-        if [ -d "${INSTALL_DIR}/${lib}" ]; then
-            echo "  - ${lib}: ${INSTALL_DIR}/${lib}"
-        elif [ -d "${INSTALL_DIR}/${lib}/${PLATFORM}" ]; then
-            echo "  - ${lib}: ${INSTALL_DIR}/${lib}/${PLATFORM}"
+        # 检查库是否在失败列表中
+        if [[ "$FAILED_LIBS" =~ (^| )$lib($| ) ]]; then
+            echo "  - ${lib}: 构建失败"
         else
-            echo "  - ${lib}: 已安装，具体位置请查看对应构建器的输出"
+            # 尝试查找安装目录（不同库可能有不同的安装结构）
+            if [ -d "${INSTALL_DIR}/${lib}" ]; then
+                echo "  - ${lib}: ${INSTALL_DIR}${lib}"
+            elif [ -d "${INSTALL_DIR}/${lib}/${PLATFORM}" ]; then
+                echo "  - ${lib}: ${INSTALL_DIR}/${lib}/${PLATFORM}"
+            else
+                echo "  - ${lib}: 已安装，具体位置请查看对应构建器的输出"
+            fi
         fi
     fi
 done
-echo "===================================================================="
+
+if [ -n "$FAILED_LIBS" ]; then
+    echo "===================================================================="
+    echo "构建完成，但存在失败的库。"
+    exit 1
+else
+    echo "===================================================================="
+    echo "所有库构建成功！"
+fi

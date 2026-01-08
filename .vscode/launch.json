@@ -1,4 +1,5 @@
 {
+    "version": "2.0.0",
     "configurations": [
         {
             "name": "(gdb) Launch",
@@ -23,7 +24,16 @@
                     "ignoreFailures": true
                 }
             ]
+        },
+        {
+        "name": "Debug with Args",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${command:cmake.launchTargetPath}",
+        "args": ["data/test.jpg"],
+        "cwd": "${workspaceFolder}",
+        "MIMode": "gdb"
         }
-    ],
-    "version": "2.0.0"
+    ]
+
 }

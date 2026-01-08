@@ -11,7 +11,7 @@ show_help() {
     echo "cnpy 构建器脚本"
     echo ""
     echo "用法:"
-    echo "  $0 [选项]"
+    echo " bash $0 [选项]"
     echo ""
     echo "必需选项:"
     echo "  --platform <平台>          目标平台 (aarch64, x86_64) [必需]"
@@ -51,16 +51,16 @@ while [[ $# -gt 0 ]]; do
             PLATFORM="$2"
             shift 2
             ;;
-        --toolchain-file)
-            TOOLCHAIN_FILE="$2"
-            shift 2
-            ;;
         --project-root)
             PROJECT_ROOT="$2"
             shift 2
             ;;
         --install-dir)
             INSTALL_DIR="$2"
+            shift 2
+            ;;
+        --toolchain-file)
+            TOOLCHAIN_FILE="$2"
             shift 2
             ;;
         --help)
@@ -146,7 +146,8 @@ echo "[cnpy构建器] 构建依赖 zlib..."
 bash ${SCRIPT_DIR}/builder_zlib.sh \
     --platform ${PLATFORM} \
     --project-root ${PROJECT_ROOT} \
-    --install-dir ${INSTALL_DIR}
+    --install-dir ${INSTALL_DIR} \
+    --toolchain-file ${TOOLCHAIN_FILE}
 
 ZLIB_ROOT=${INSTALL_DIR}/zlib/${PLATFORM}
 
@@ -237,4 +238,4 @@ else
     fi
 fi
 
-echo "[cnpy构建器] cnpy编译完成，已安装到 ${INSTALL_DIR}/cnpy/${PLATFORM}"
+echo "[cnpy构建器] cnpy构建完成"

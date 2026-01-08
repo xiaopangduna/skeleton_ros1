@@ -9,7 +9,7 @@ show_help() {
     echo "GTest 构建器脚本"
     echo ""
     echo "用法:"
-    echo "  $0 [选项]"
+    echo " bash $0 [选项]"
     echo ""
     echo "必需选项:"
     echo "  --platform <平台>          目标平台 (aarch64, x86_64) [必需]"
@@ -45,16 +45,16 @@ while [[ $# -gt 0 ]]; do
             PLATFORM="$2"
             shift 2
             ;;
-        --toolchain-file)
-            TOOLCHAIN_FILE="$2"
-            shift 2
-            ;;
         --project-root)
             PROJECT_ROOT="$2"
             shift 2
             ;;
         --install-dir)
             INSTALL_DIR="$2"
+            shift 2
+            ;;
+        --toolchain-file)
+            TOOLCHAIN_FILE="$2"
             shift 2
             ;;
         --help)

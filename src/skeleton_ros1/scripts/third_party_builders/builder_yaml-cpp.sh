@@ -49,16 +49,16 @@ while [[ $# -gt 0 ]]; do
             PLATFORM="$2"
             shift 2
             ;;
-        --toolchain-file)
-            TOOLCHAIN_FILE="$2"
-            shift 2
-            ;;
         --project-root)
             PROJECT_ROOT="$2"
             shift 2
             ;;
         --install-dir)
             INSTALL_DIR="$2"
+            shift 2
+            ;;
+        --toolchain-file)
+            TOOLCHAIN_FILE="$2"
             shift 2
             ;;
         --help)

@@ -47,16 +47,16 @@ while [[ $# -gt 0 ]]; do
             PLATFORM="$2"
             shift 2
             ;;
-        --toolchain-file)
-            TOOLCHAIN_FILE="$2"
-            shift 2
-            ;;
         --project-root)
             PROJECT_ROOT="$2"
             shift 2
             ;;
         --install-dir)
             INSTALL_DIR="$2"
+            shift 2
+            ;;
+        --toolchain-file)
+            TOOLCHAIN_FILE="$2"
             shift 2
             ;;
         --help)
@@ -195,7 +195,6 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "[OpenCV构建器] 编译OpenCV..."
-CPU_CORES=$(nproc 2>/dev/null || echo 4)
 echo "[OpenCV构建器] 使用 4 个CPU核心进行编译"
 make -j4
 
