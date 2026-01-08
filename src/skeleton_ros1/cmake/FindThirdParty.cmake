@@ -5,9 +5,12 @@
 
 
 # 设置第三方库目录
-set(THIRD_PARTY_DIR "${CMAKE_SOURCE_DIR}/third_party")
+set(THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
+message(STATUS "==============================================================================")
+message(STATUS "第三方库配置信息:")
+message(STATUS "  - THIRD_PARTY_DIR: ${THIRD_PARTY_DIR}")
 
-# # 导入自定义的查找模块
+# 导入自定义的查找模块
 include(FindOpenCVCustom)
 include(FindSpdlogCustom)
 include(FindYamlCppCustom)

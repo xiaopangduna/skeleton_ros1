@@ -1,8 +1,22 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(skeleton_ros1)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++17)
+# 指定C++标准
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+message(STATUS "CMake配置信息:")
+message(STATUS "  - CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
+message(STATUS "  - CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
+message(STATUS "  - CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
+message(STATUS "  - CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
+message(STATUS "  - CMAKE_CXX_COMPILER: ${CMAKE_CXX_COMPILER}")
+message(STATUS "  - CMAKE_SYSROOT: ${CMAKE_SYSROOT}")
+message(STATUS "  - CMAKE_CROSSCOMPILING: ${CMAKE_CROSSCOMPILING}")
+message(STATUS "  - CMAKE_CXX_STANDARD: ${CMAKE_CXX_STANDARD}")
+message(STATUS "  - CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+message(STATUS "  - CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "  - CMAKE_CXX_COMPILER_VERSION: ${CMAKE_CXX_COMPILER_VERSION}")
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
