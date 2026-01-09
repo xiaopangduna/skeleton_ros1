@@ -34,7 +34,7 @@ function(create_test TEST_NAME)
 
     set_tests_properties(${PROJECT_NAME}.${TEST_NAME}
         PROPERTIES
-            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../"
             LABELS "unit"
     )
 endfunction()
