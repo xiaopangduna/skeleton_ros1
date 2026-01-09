@@ -236,3 +236,17 @@ install(TARGETS
 # catkin_add_nosetests(test)
 
 add_subdirectory(apps)
+
+# 添加测试
+message(STATUS "==============================================================================")
+if(ENABLE_TESTS )
+    if(GTest_FOUND)
+        message(STATUS "测试已被启用，开始编译测试用例")
+        enable_testing()
+        add_subdirectory(tests)
+    else()
+        message(WARNING "测试已被启用，但未找到 Google Test，测试将被跳过")
+    endif()
+else()
+    message(STATUS "测试已被禁用")
+endif()

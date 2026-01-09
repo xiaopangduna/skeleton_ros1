@@ -20,4 +20,6 @@ include(FindZlibCustom)
 include(FindRknn)
 include(FindRgaCustom)
 
+include(FindGTestCustom)
+
 message(STATUS "已完成第三方库配置")
