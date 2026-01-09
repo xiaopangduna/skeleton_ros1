@@ -30,7 +30,7 @@
         "type": "cppdbg",
         "request": "launch",
         "program": "${command:cmake.launchTargetPath}",
-        "args": ["data/test.jpg"],
+        "args": [],
         "cwd": "${workspaceFolder}",
         "MIMode": "gdb"
         }
