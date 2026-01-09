@@ -1,6 +1,8 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.15)
+
 project(skeleton_ros1)
 
+option(ENABLE_TESTS "Enable unit tests" ON)
 # 指定C++标准
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -143,11 +145,17 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-## Declare a C++ library
-add_library(${PROJECT_NAME} STATIC
-  src/calculator/Calculator.cpp
+# 定义源文件列表
+set(SOURCES_FILE
   src/ProcessorNode.cpp
+  src/utils/logger_factory.cpp
+  src/utils/yaml.cpp
 )
+
+add_library(${PROJECT_NAME} STATIC ${SOURCES_FILE})
+
+target_link_libraries(${PROJECT_NAME} PUBLIC ${OpenCV_LIBS} spdlog::spdlog yaml-cpp::yaml-cpp)
+
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
